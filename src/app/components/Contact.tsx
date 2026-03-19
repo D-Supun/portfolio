@@ -13,13 +13,43 @@ export function Contact() {
     email: '',
     message: ''
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast.success('Message sent successfully!', {
-      description: "Thank you for reaching out. I'll get back to you soon."
-    });
-    setFormData({ name: '', email: '', message: '' });
+    setIsSubmitting(true);
+    
+    try {
+      const response = await fetch("https://formsubmit.co/ajax/dsupunpehesara@gmail.com", {
+        method: "POST",
+        headers: { 
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+            name: formData.name,
+            email: formData.email,
+            message: formData.message
+        })
+      });
+
+      if (response.ok) {
+        toast.success('Message sent successfully!', {
+          description: "Thank you for reaching out. I'll get back to you soon."
+        });
+        setFormData({ name: '', email: '', message: '' });
+      } else {
+        toast.error('Failed to send message.', {
+          description: "Something went wrong. Please try again later."
+        });
+      }
+    } catch (error) {
+       toast.error('Network error.', {
+          description: "Check your internet connection and try again."
+       });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // ✅ YOUR DETAILS
@@ -121,9 +151,12 @@ export function Contact() {
                   />
                 </div>
 
-                <Button className="w-full bg-[#00d4ff] hover:bg-[#00b8e6] text-black">
-                  <Send className="mr-2 h-4 w-4" />
-                  Send Message
+                <Button 
+                  disabled={isSubmitting}
+                  className="w-full bg-[#00d4ff] hover:bg-[#00b8e6] text-black disabled:opacity-50"
+                 >
+                  <Send className={`mr-2 h-4 w-4 ${isSubmitting ? 'animate-pulse' : ''}`} />
+                  {isSubmitting ? 'Sending...' : 'Send Message'}
                 </Button>
 
               </form>
